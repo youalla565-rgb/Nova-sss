@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
 </head>
 <body class="bg-mesh">
 
@@ -19,6 +21,7 @@
         <path d="M12 2 L14 9 L21 12 L14 15 L12 22 L10 15 L3 12 L10 9 Z" fill="url(#g1)"/>
         <defs><linearGradient id="g1" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#f2d9a3"/><stop offset="1" stop-color="#b98d46"/></linearGradient></defs>
       </svg>
+      <img data-media="logo_url" class="hidden w-8 h-8 rounded-lg object-cover" src="" alt="Nova Studio">
       <span class="font-en text-xl font-bold tracking-wide">NOVA <span class="text-gold-grad">STUDIO</span></span>
     </a>
     <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -50,7 +53,7 @@
   </div>
 </header>
 
-<section class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-5 overflow-hidden">
+<section data-media="heroBg_url" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-5 overflow-hidden">
   <div class="blob blob1"></div><div class="blob blob2"></div><div class="blob blob3"></div>
   <div class="relative max-w-5xl mx-auto text-center">
     <span class="inline-block text-xs font-en font-semibold text-[var(--gold-bright)] border border-[var(--gold)]/30 rounded-full px-4 py-1.5 mb-6" style="letter-spacing:.15em">✦ STUDIO FOR BOLD BRANDS</span>

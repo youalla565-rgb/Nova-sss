@@ -1,16 +1,12 @@
 /* =========================================================
    Nova Studio — Admin Dashboard Script
-   Content editor, member approval, media/image upload.
-   All data is persisted in the browser via localStorage —
-   this is a front-end-only demo dashboard (no server).
+   Content editor, member approval, and image uploads —
+   all backed by Supabase (database + storage).
+   Requires: supabase-config.js loaded before this file.
 ========================================================= */
 
-const STORAGE = {
-  theme:   'nova_theme',
-  content: 'nova_content',
-  media:   'nova_media',
-  members: 'nova_members'
-};
+const THEME_KEY = 'nova_theme';
+const MEDIA_BUCKET = 'media';
 
 const DEFAULT_CONTENT = {
   heroTitle: 'نصمم هويات بصرية لا تُنسى',
@@ -20,24 +16,6 @@ const DEFAULT_CONTENT = {
   servicesIntro: 'كل ما تحتاجه علامتك التجارية في مكان واحد.',
   contactIntro: 'أخبرنا عن فكرتك، وسنعود إليك خلال 24 ساعة.'
 };
-
-const DEFAULT_MEMBERS = [
-  { id: 1, name: 'سارة العتيبي', email: 'sara@example.com', status: 'approved' },
-  { id: 2, name: 'أحمد فتحي', email: 'ahmed@example.com', status: 'pending' },
-  { id: 3, name: 'منى خليل', email: 'mona@example.com', status: 'pending' }
-];
-
-function seedIfEmpty(){
-  if(!localStorage.getItem(STORAGE.content)){
-    localStorage.setItem(STORAGE.content, JSON.stringify(DEFAULT_CONTENT));
-  }
-  if(!localStorage.getItem(STORAGE.members)){
-    localStorage.setItem(STORAGE.members, JSON.stringify(DEFAULT_MEMBERS));
-  }
-  if(!localStorage.getItem(STORAGE.media)){
-    localStorage.setItem(STORAGE.media, JSON.stringify({ logo: '', heroBg: '' }));
-  }
-}
 
 function showToast(msg){
   const toast = document.getElementById('dash-toast');
@@ -54,7 +32,7 @@ function showToast(msg){
 
 /* ---------- SIDEBAR NAVIGATION ---------- */
 function initSidebarNav(){
-  const links = document.querySelectorAll('.dash-link');
+  const links = document.querySelectorAll('.dash-link[data-target]');
   const panels = document.querySelectorAll('.dash-panel');
   links.forEach(link => {
     link.addEventListener('click', () => {
@@ -63,56 +41,80 @@ function initSidebarNav(){
       panels.forEach(p => p.classList.remove('active'));
       link.classList.add('active');
       document.getElementById(target).classList.add('active');
-
-      // close sidebar on mobile after selecting
       document.querySelector('.dash-sidebar').classList.remove('open');
     });
   });
-
   const sidebarBtn = document.getElementById('sidebar-toggle');
   if(sidebarBtn){
-    sidebarBtn.addEventListener('click', () => {
-      document.querySelector('.dash-sidebar').classList.toggle('open');
-    });
+    sidebarBtn.addEventListener('click', () => document.querySelector('.dash-sidebar').classList.toggle('open'));
   }
 }
 
 /* ---------- CONTENT EDITOR ---------- */
-function loadContentForm(){
-  const content = JSON.parse(localStorage.getItem(STORAGE.content) || '{}');
+async function getContentMap(){
+  const { data, error } = await sb.from('content').select('key, value');
+  if(error){ console.error(error); return {}; }
+  const map = {};
+  (data || []).forEach(row => { map[row.key] = row.value; });
+  return map;
+}
+
+async function loadContentForm(){
+  const map = await getContentMap();
   document.querySelectorAll('#panel-content [data-field]').forEach(input => {
     const key = input.getAttribute('data-field');
-    if(content[key] !== undefined) input.value = content[key];
+    input.value = map[key] !== undefined ? map[key] : (DEFAULT_CONTENT[key] || '');
   });
 }
 
 function initContentForm(){
   const form = document.getElementById('content-form');
   if(!form) return;
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const content = JSON.parse(localStorage.getItem(STORAGE.content) || '{}');
-    form.querySelectorAll('[data-field]').forEach(input => {
-      content[input.getAttribute('data-field')] = input.value;
-    });
-    localStorage.setItem(STORAGE.content, JSON.stringify(content));
-    showToast('تم حفظ النصوص بنجاح');
+    const btn = form.querySelector('button[type="submit"]');
+    const original = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = 'جاري الحفظ...';
+
+    try{
+      const rows = [];
+      form.querySelectorAll('[data-field]').forEach(input => {
+        rows.push({ key: input.getAttribute('data-field'), value: input.value });
+      });
+      const { error } = await sb.from('content').upsert(rows, { onConflict: 'key' });
+      if(error) throw error;
+      showToast('تم حفظ النصوص بنجاح');
+    }catch(err){
+      showToast('حصل خطأ أثناء الحفظ');
+      console.error(err);
+    }finally{
+      btn.disabled = false;
+      btn.innerText = original;
+    }
   });
 }
 
 /* ---------- MEMBERS APPROVAL ---------- */
-function renderMembers(){
+async function fetchMembers(){
+  const { data, error } = await sb.from('members').select('*').order('created_at', { ascending: false });
+  if(error){ console.error(error); return []; }
+  return data || [];
+}
+
+async function renderMembers(){
   const list = document.getElementById('members-list');
   if(!list) return;
-  const members = JSON.parse(localStorage.getItem(STORAGE.members) || '[]');
+  const members = await fetchMembers();
   list.innerHTML = '';
 
   if(members.length === 0){
     list.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-[var(--muted)]">لا يوجد أعضاء حالياً</td></tr>`;
+    updateMemberStats(members);
     return;
   }
 
-  members.slice().reverse().forEach(m => {
+  members.forEach(m => {
     const statusClass = m.status === 'approved' ? 'status-approved' : m.status === 'rejected' ? 'status-rejected' : 'status-pending';
     const statusLabel = m.status === 'approved' ? 'مقبول' : m.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة';
     const row = document.createElement('tr');
@@ -130,24 +132,25 @@ function renderMembers(){
   });
 
   list.querySelectorAll('[data-action]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = Number(btn.getAttribute('data-id'));
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
       const action = btn.getAttribute('data-action');
-      const members = JSON.parse(localStorage.getItem(STORAGE.members) || '[]');
-      const target = members.find(m => m.id === id);
-      if(target){
-        target.status = action === 'approve' ? 'approved' : 'rejected';
-        localStorage.setItem(STORAGE.members, JSON.stringify(members));
+      try{
+        const { error } = await sb.from('members').update({ status: action === 'approve' ? 'approved' : 'rejected' }).eq('id', id);
+        if(error) throw error;
         showToast(action === 'approve' ? 'تم قبول العضو' : 'تم رفض العضو');
         renderMembers();
-        updateMemberStats();
+      }catch(err){
+        showToast('حصل خطأ، حاول تاني');
+        console.error(err);
       }
     });
   });
+
+  updateMemberStats(members);
 }
 
-function updateMemberStats(){
-  const members = JSON.parse(localStorage.getItem(STORAGE.members) || '[]');
+function updateMemberStats(members){
   const total = members.length;
   const pending = members.filter(m => m.status === 'pending').length;
   const approved = members.filter(m => m.status === 'approved').length;
@@ -159,63 +162,68 @@ function updateMemberStats(){
   if(elApproved) elApproved.innerText = approved;
 }
 
-/* ---------- MEDIA / IMAGE EDITOR ---------- */
-function initMediaUploads(){
-  const media = JSON.parse(localStorage.getItem(STORAGE.media) || '{}');
+/* ---------- MEDIA / IMAGE EDITOR (Supabase Storage) ---------- */
+async function uploadToBucket(file, key){
+  const ext = file.name.split('.').pop();
+  const path = `${key}-${Date.now()}.${ext}`;
+  const { error: uploadError } = await sb.storage.from(MEDIA_BUCKET).upload(path, file, { upsert: true });
+  if(uploadError) throw uploadError;
+  const { data } = sb.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+  const publicUrl = data.publicUrl;
+  const { error: dbError } = await sb.from('content').upsert([{ key, value: publicUrl }], { onConflict: 'key' });
+  if(dbError) throw dbError;
+  return publicUrl;
+}
+
+async function initMediaUploads(){
+  const map = await getContentMap();
+  if(map.logo_url){ const p = document.getElementById('preview-logo'); if(p) p.src = map.logo_url; }
+  if(map.heroBg_url){ const p = document.getElementById('preview-hero'); if(p) p.src = map.heroBg_url; }
 
   const setupUploader = (inputId, previewId, key) => {
     const input = document.getElementById(inputId);
     const preview = document.getElementById(previewId);
     if(!input) return;
-
-    if(media[key] && preview) preview.src = media[key];
-
-    input.addEventListener('change', () => {
+    input.addEventListener('change', async () => {
       const file = input.files[0];
       if(!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const current = JSON.parse(localStorage.getItem(STORAGE.media) || '{}');
-        current[key] = reader.result;
-        localStorage.setItem(STORAGE.media, JSON.stringify(current));
-        if(preview) preview.src = reader.result;
+      try{
+        const url = await uploadToBucket(file, key);
+        if(preview) preview.src = url;
         showToast('تم تحديث الصورة بنجاح');
-      };
-      reader.readAsDataURL(file);
+      }catch(err){
+        showToast('فشل رفع الصورة');
+        console.error(err);
+      }
     });
   };
 
-  setupUploader('upload-logo', 'preview-logo', 'logo');
-  setupUploader('upload-hero', 'preview-hero', 'heroBg');
+  setupUploader('upload-logo', 'preview-logo', 'logo_url');
+  setupUploader('upload-hero', 'preview-hero', 'heroBg_url');
 }
 
-/* ---------- THEME (dashboard has its own toggle too) ---------- */
+/* ---------- THEME ---------- */
 function applyTheme(theme){ document.documentElement.setAttribute('data-theme', theme); }
-function initTheme(){
-  const saved = localStorage.getItem(STORAGE.theme) || 'dark';
-  applyTheme(saved);
-}
+function initTheme(){ applyTheme(localStorage.getItem(THEME_KEY) || 'dark'); }
 function initThemeToggle(){
   document.querySelectorAll('.theme-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
       const next = current === 'light' ? 'dark' : 'light';
       applyTheme(next);
-      localStorage.setItem(STORAGE.theme, next);
+      localStorage.setItem(THEME_KEY, next);
     });
   });
 }
 
 /* ---------- INIT ---------- */
 document.addEventListener('DOMContentLoaded', () => {
-  seedIfEmpty();
   initTheme();
   initThemeToggle();
   initSidebarNav();
   loadContentForm();
   initContentForm();
   renderMembers();
-  updateMemberStats();
   initMediaUploads();
   if(window.lucide) lucide.createIcons();
 });
