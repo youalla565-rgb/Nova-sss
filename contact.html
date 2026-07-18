@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تواصل معنا | Nova Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-mesh">
+
+<header id="site-header" class="fixed top-0 inset-x-0 z-50">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 h-20 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 shrink-0">
+      <svg class="spark" width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 2 L14 9 L21 12 L14 15 L12 22 L10 15 L3 12 L10 9 Z" fill="url(#g1)"/><defs><linearGradient id="g1" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#f2d9a3"/><stop offset="1" stop-color="#b98d46"/></linearGradient></defs></svg>
+      <span class="font-en text-xl font-bold tracking-wide">NOVA <span class="text-gold-grad">STUDIO</span></span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="index.html" class="nav-link">الرئيسية</a>
+      <a href="about.html" class="nav-link">من نحن</a>
+      <a href="services.html" class="nav-link">خدماتنا</a>
+      <a href="contact.html" class="nav-link active">تواصل معنا</a>
+    </nav>
+    <div class="hidden md:flex items-center gap-4">
+      <div class="theme-toggle"><div class="dot"></div></div>
+      <a href="contact.html" class="btn-glow rounded-full px-6 py-2.5 text-sm font-bold">ابدأ مشروعك</a>
+    </div>
+    <div class="flex items-center gap-3 md:hidden">
+      <div class="theme-toggle"><div class="dot"></div></div>
+      <button id="menu-btn" class="text-[var(--text)]"><i data-lucide="menu" id="icon-menu" class="w-7 h-7"></i><i data-lucide="x" id="icon-close" class="w-7 h-7 hidden"></i></button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="md:hidden px-5">
+    <nav class="flex flex-col gap-1 pb-5 text-base border-t border-[var(--border)] pt-4">
+      <a href="index.html" class="nav-link py-2">الرئيسية</a>
+      <a href="about.html" class="nav-link py-2">من نحن</a>
+      <a href="services.html" class="nav-link py-2">خدماتنا</a>
+      <a href="contact.html" class="nav-link py-2 active">تواصل معنا</a>
+      <a href="contact.html" class="btn-glow rounded-full px-6 py-2.5 text-sm font-bold text-center mt-2">ابدأ مشروعك</a>
+    </nav>
+  </div>
+</header>
+
+<section class="relative pt-40 pb-24 px-5 overflow-hidden">
+  <div class="blob blob1"></div><div class="blob blob2"></div>
+  <div class="relative max-w-2xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="text-xs font-en font-semibold text-[var(--gold-bright)]">GET IN TOUCH</span>
+      <h1 class="text-3xl md:text-5xl font-black mt-3 mb-4">لنبدأ مشروعك القادم</h1>
+      <p data-key="contactIntro" class="text-[var(--muted)]">أخبرنا عن فكرتك، وسنعود إليك خلال 24 ساعة.</p>
+    </div>
+
+    <form id="lead-form" class="card rounded-2xl p-6 md:p-10 space-y-5">
+      <div>
+        <label class="block text-sm font-medium mb-2 text-[var(--muted)]">الاسم الكامل</label>
+        <input type="text" name="name" required class="field w-full rounded-xl px-4 py-3.5" placeholder="اسمك الكامل">
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-2 text-[var(--muted)]">البريد الإلكتروني</label>
+        <input type="email" name="email" required class="field w-full rounded-xl px-4 py-3.5 font-en" placeholder="you@example.com">
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-2 text-[var(--muted)]">رسالتك</label>
+        <textarea name="message" required rows="4" class="field w-full rounded-xl px-4 py-3.5 resize-none" placeholder="حدثنا عن مشروعك..."></textarea>
+      </div>
+      <button type="submit" class="btn-glow w-full rounded-xl py-4 font-bold text-base">إرسال الرسالة</button>
+    </form>
+  </div>
+</section>
+
+<footer class="relative border-t border-[var(--border)] pt-12 pb-6 px-5">
+  <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <p class="text-xs text-[var(--muted)] font-en">© 2026 Nova Studio. All rights reserved.</p>
+    <a href="admin/dashboard.html" class="text-xs text-[var(--muted)] hover:text-[var(--gold-bright)] transition">لوحة التحكم</a>
+  </div>
+</footer>
+
+<div id="toast" class="fixed bottom-6 inset-x-0 mx-auto w-[92%] max-w-sm translate-y-24 opacity-0 z-[100]">
+  <div class="card border-[var(--gold)]/40 rounded-2xl px-5 py-4 flex items-center gap-3 shadow-2xl">
+    <div class="icon-wrap w-10 h-10 rounded-full flex items-center justify-center shrink-0"><i data-lucide="check-circle-2" class="w-5 h-5 text-[var(--gold-bright)]"></i></div>
+    <div><p class="font-bold text-sm">تم الإرسال بنجاح!</p><p class="text-xs text-[var(--muted)]">هنتواصل معاك في أقرب وقت ممكن.</p></div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

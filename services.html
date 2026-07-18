@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>خدماتنا | Nova Studio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-mesh">
+
+<header id="site-header" class="fixed top-0 inset-x-0 z-50">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 h-20 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 shrink-0">
+      <svg class="spark" width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 2 L14 9 L21 12 L14 15 L12 22 L10 15 L3 12 L10 9 Z" fill="url(#g1)"/><defs><linearGradient id="g1" x1="0" y1="0" x2="24" y2="24"><stop offset="0" stop-color="#f2d9a3"/><stop offset="1" stop-color="#b98d46"/></linearGradient></defs></svg>
+      <span class="font-en text-xl font-bold tracking-wide">NOVA <span class="text-gold-grad">STUDIO</span></span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="index.html" class="nav-link">الرئيسية</a>
+      <a href="about.html" class="nav-link">من نحن</a>
+      <a href="services.html" class="nav-link active">خدماتنا</a>
+      <a href="contact.html" class="nav-link">تواصل معنا</a>
+    </nav>
+    <div class="hidden md:flex items-center gap-4">
+      <div class="theme-toggle"><div class="dot"></div></div>
+      <a href="contact.html" class="btn-glow rounded-full px-6 py-2.5 text-sm font-bold">ابدأ مشروعك</a>
+    </div>
+    <div class="flex items-center gap-3 md:hidden">
+      <div class="theme-toggle"><div class="dot"></div></div>
+      <button id="menu-btn" class="text-[var(--text)]"><i data-lucide="menu" id="icon-menu" class="w-7 h-7"></i><i data-lucide="x" id="icon-close" class="w-7 h-7 hidden"></i></button>
+    </div>
+  </div>
+  <div id="mobile-menu" class="md:hidden px-5">
+    <nav class="flex flex-col gap-1 pb-5 text-base border-t border-[var(--border)] pt-4">
+      <a href="index.html" class="nav-link py-2">الرئيسية</a>
+      <a href="about.html" class="nav-link py-2">من نحن</a>
+      <a href="services.html" class="nav-link py-2 active">خدماتنا</a>
+      <a href="contact.html" class="nav-link py-2">تواصل معنا</a>
+      <a href="contact.html" class="btn-glow rounded-full px-6 py-2.5 text-sm font-bold text-center mt-2">ابدأ مشروعك</a>
+    </nav>
+  </div>
+</header>
+
+<section class="relative pt-40 pb-16 px-5 overflow-hidden">
+  <div class="blob blob2"></div>
+  <div class="relative max-w-3xl mx-auto text-center">
+    <span class="text-xs font-en font-semibold text-[var(--violet-bright)]">SERVICES</span>
+    <h1 class="text-4xl md:text-6xl font-black mt-3 mb-4 text-gold-grad">خدماتنا</h1>
+    <p data-key="servicesIntro" class="text-[var(--muted)]">كل ما تحتاجه علامتك التجارية لتظهر بأفضل صورة، في مكان واحد.</p>
+  </div>
+</section>
+
+<section class="relative py-16 px-5">
+  <div class="max-w-6xl mx-auto grid sm:grid-cols-2 gap-6">
+    <div class="card hoverable rounded-2xl p-8"><div class="icon-wrap w-14 h-14 rounded-xl flex items-center justify-center mb-6"><i data-lucide="palette" class="w-7 h-7 text-[var(--gold-bright)]"></i></div><h3 class="text-xl font-bold mb-3">هوية بصرية متكاملة</h3><p class="text-sm text-[var(--muted)] leading-relaxed">تصميم شعار، ألوان، خطوط، ودليل استخدام كامل يعكس شخصية علامتك بدقة واحترافية.</p></div>
+    <div class="card hoverable rounded-2xl p-8"><div class="icon-wrap w-14 h-14 rounded-xl flex items-center justify-center mb-6"><i data-lucide="layout-template" class="w-7 h-7 text-[var(--gold-bright)]"></i></div><h3 class="text-xl font-bold mb-3">تصميم مواقع الويب</h3><p class="text-sm text-[var(--muted)] leading-relaxed">مواقع سريعة وأنيقة متجاوبة مع جميع الأجهزة، مبنية لتحويل الزوار إلى عملاء.</p></div>
+    <div class="card hoverable rounded-2xl p-8"><div class="icon-wrap w-14 h-14 rounded-xl flex items-center justify-center mb-6"><i data-lucide="sparkles" class="w-7 h-7 text-[var(--gold-bright)]"></i></div><h3 class="text-xl font-bold mb-3">إعلانات وسوشيال ميديا</h3><p class="text-sm text-[var(--muted)] leading-relaxed">محتوى بصري جذاب لمنصات التواصل الاجتماعي يعزز حضورك الرقمي.</p></div>
+    <div class="card hoverable rounded-2xl p-8"><div class="icon-wrap w-14 h-14 rounded-xl flex items-center justify-center mb-6"><i data-lucide="package" class="w-7 h-7 text-[var(--gold-bright)]"></i></div><h3 class="text-xl font-bold mb-3">تغليف ومطبوعات</h3><p class="text-sm text-[var(--muted)] leading-relaxed">تصميم عبوات، بطاقات أعمال، ودعوات فاخرة تترك انطباعاً أولاً.</p></div>
+  </div>
+</section>
+
+<footer class="relative border-t border-[var(--border)] pt-12 pb-6 px-5">
+  <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <p class="text-xs text-[var(--muted)] font-en">© 2026 Nova Studio. All rights reserved.</p>
+    <a href="admin/dashboard.html" class="text-xs text-[var(--muted)] hover:text-[var(--gold-bright)] transition">لوحة التحكم</a>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
