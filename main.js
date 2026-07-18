@@ -1,64 +1,57 @@
 /* =========================================================
    Nova Studio — Shared Front-End Script
-   Theme toggle (local, per-visitor), mobile nav, FAQ accordion,
-   dynamic content + contact form now backed by Supabase.
-   Requires: supabase-config.js loaded before this file.
+   Theme toggle, mobile nav, dynamic content from the
+   admin dashboard (localStorage), FAQ accordion, contact form.
 ========================================================= */
 
-const THEME_KEY = 'nova_theme';
+const STORAGE = {
+  theme:   'nova_theme',
+  content: 'nova_content',
+  media:   'nova_media',
+  members: 'nova_members'
+};
 
-/* ---------- THEME (kept local — it's a per-device UI preference) ---------- */
+/* ---------- THEME ---------- */
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
 }
 function initTheme(){
-  const saved = localStorage.getItem(THEME_KEY) || 'dark';
+  const saved = localStorage.getItem(STORAGE.theme) || 'dark';
   applyTheme(saved);
 }
 function toggleTheme(){
   const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
   const next = current === 'light' ? 'dark' : 'light';
   applyTheme(next);
-  localStorage.setItem(THEME_KEY, next);
+  localStorage.setItem(STORAGE.theme, next);
 }
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  document.querySelectorAll('.theme-toggle').forEach(btn => btn.addEventListener('click', toggleTheme));
+  const toggleBtns = document.querySelectorAll('.theme-toggle');
+  toggleBtns.forEach(btn => btn.addEventListener('click', toggleTheme));
 });
 
-/* ---------- DYNAMIC CONTENT FROM SUPABASE ---------- */
-async function applyDynamicContent(){
+/* ---------- DYNAMIC CONTENT FROM DASHBOARD ---------- */
+function applyDynamicContent(){
   try{
-    const { data, error } = await sb.from('content').select('key, value');
-    if(error) throw error;
-
-    const map = {};
-    (data || []).forEach(row => { map[row.key] = row.value; });
-
+    const content = JSON.parse(localStorage.getItem(STORAGE.content) || '{}');
     document.querySelectorAll('[data-key]').forEach(el => {
       const key = el.getAttribute('data-key');
-      if(map[key]) el.innerText = map[key];
+      if(content[key]) el.innerText = content[key];
     });
 
-    // logo image (falls back to the inline SVG mark if not set)
-    if(map.logo_url){
-      document.querySelectorAll('[data-media="logo_url"]').forEach(img => {
-        img.src = map.logo_url;
-        img.classList.remove('hidden');
-        const svg = img.parentElement.querySelector('.spark');
-        if(svg) svg.classList.add('hidden');
-      });
+    const media = JSON.parse(localStorage.getItem(STORAGE.media) || '{}');
+    if(media.logo){
+      document.querySelectorAll('[data-media="logo"]').forEach(el => el.setAttribute('src', media.logo));
     }
-
-    // hero background image
-    if(map.heroBg_url){
-      document.querySelectorAll('[data-media="heroBg_url"]').forEach(el => {
-        el.style.backgroundImage = `url(${map.heroBg_url})`;
+    if(media.heroBg){
+      document.querySelectorAll('[data-media="heroBg"]').forEach(el => {
+        el.style.backgroundImage = `url(${media.heroBg})`;
         el.style.backgroundSize = 'cover';
         el.style.backgroundPosition = 'center';
       });
     }
-  }catch(e){ console.warn('تعذر تحميل المحتوى من قاعدة البيانات', e); }
+  }catch(e){ console.warn('content sync failed', e); }
 }
 document.addEventListener('DOMContentLoaded', applyDynamicContent);
 
@@ -96,45 +89,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* ---------- CONTACT FORM → members table ---------- */
+/* ---------- CONTACT FORM ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('lead-form');
   const toast = document.getElementById('toast');
   if(!form) return;
   let toastTimer;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalLabel = submitBtn.innerText;
-    submitBtn.disabled = true;
-    submitBtn.innerText = 'جاري الإرسال...';
 
-    const name = form.querySelector('[name="name"]').value;
-    const email = form.querySelector('[name="email"]').value;
-    const message = form.querySelector('[name="message"]')?.value || '';
-
+    // save as a "pending member" lead for the admin dashboard
     try{
-      const { error } = await sb.from('members').insert([{ name, email, status: 'pending' }]);
-      if(error) throw error;
+      const members = JSON.parse(localStorage.getItem(STORAGE.members) || '[]');
+      const name = form.querySelector('[name="name"]').value;
+      const email = form.querySelector('[name="email"]').value;
+      members.push({ id: Date.now(), name, email, status: 'pending' });
+      localStorage.setItem(STORAGE.members, JSON.stringify(members));
+    }catch(e){ console.warn(e); }
 
-      if(toast){
-        toast.classList.remove('translate-y-24','opacity-0');
-        toast.classList.add('translate-y-0','opacity-100');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-          toast.classList.add('translate-y-24','opacity-0');
-          toast.classList.remove('translate-y-0','opacity-100');
-        }, 3800);
-      }
-      form.reset();
-    }catch(err){
-      alert('في مشكلة حصلت أثناء الإرسال، حاول تاني.');
-      console.error(err);
-    }finally{
-      submitBtn.disabled = false;
-      submitBtn.innerText = originalLabel;
+    if(toast){
+      toast.classList.remove('translate-y-24','opacity-0');
+      toast.classList.add('translate-y-0','opacity-100');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-24','opacity-0');
+        toast.classList.remove('translate-y-0','opacity-100');
+      }, 3800);
     }
+    form.reset();
   });
 });
 
